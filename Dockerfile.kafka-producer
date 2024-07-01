@@ -1,0 +1,18 @@
+# Usar una imagen base oficial de Python
+FROM python:3.9-slim
+
+# Instalar librerías necesarias
+RUN pip install kafka-python python-dotenv
+
+# Crear un directorio de trabajo
+WORKDIR /app
+
+# Copiar el script de Kafka Producer y el archivo de configuración al contenedor
+COPY kafka_producer.py .
+COPY config.env .
+
+# Exportar las variables de entorno desde config.env
+RUN export $(cat config.env | xargs)
+
+# Ejecutar el script de Kafka Producer
+CMD ["sh", "-c", "python kafka_producer.py"]

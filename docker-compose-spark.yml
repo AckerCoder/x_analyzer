@@ -1,0 +1,17 @@
+version: "3"
+
+services:
+  spark:
+    build:
+      context: .
+      dockerfile: Dockerfile.spark-consumer
+    env_file:
+      - .env
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+    command:
+      [
+        "/bin/bash",
+        "-c",
+        "while ! nc -z $EC2_PUBLIC_DNS_PRODUCER_BROKER 9092; do sleep 1; done; /opt/bitnami/scripts/spark/entrypoint.sh /opt/spark-apps/spark_kafka_consumer.py",
+      ]

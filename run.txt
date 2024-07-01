@@ -1,0 +1,8 @@
+Acceder a una instancia ec2:
+
+ssh -i /Users/ackercoder/Desktop/x_analyzer/mick-kafka.pem ubuntu@3.239.243.188
+
+
+Orden de deploys:
+deploy_zookeeper.ssh
+deploy_kafka_producer_broker.sh

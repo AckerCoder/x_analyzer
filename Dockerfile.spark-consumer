@@ -1,0 +1,26 @@
+# Usar la imagen base de Spark con Hadoop
+FROM bitnami/spark:3.3.1
+
+# Crear directorios necesarios y establecer permisos
+RUN mkdir -p /opt/spark-apps /opt/spark/jars && \
+    chmod -R 755 /opt/spark
+
+# Copiar el script Python y el archivo .env al contenedor
+COPY spark_kafka_consumer.py /opt/spark-apps/spark_kafka_consumer.py
+COPY .env /opt/spark-apps/.env
+
+# Establecer la variable de entorno PYSPARK
+ENV PYSPARK_PYTHON=python3
+
+# Instalar dependencias necesarias
+USER root
+RUN apt-get update && \
+    apt-get install -y python3-pip curl && \
+    pip3 install kafka-python
+
+# Instalar librerías de Spark Streaming para Kafka
+RUN curl -L -o /opt/spark/jars/spark-sql-kafka-0-10_2.12-3.3.1.jar https://repo1.maven.org/maven2/org/apache/spark/spark-sql-kafka-0-10_2.12/3.3.1/spark-sql-kafka-0-10_2.12-3.3.1.jar && \
+    curl -L -o /opt/spark/jars/spark-streaming-kafka-0-10-assembly_2.12-3.3.1.jar https://repo1.maven.org/maven2/org/apache/spark/spark-streaming-kafka-0-10-assembly_2.12/3.3.1/spark-streaming-kafka-0-10-assembly_2.12-3.3.1.jar
+
+# Comando para ejecutar el script con Spark
+ENTRYPOINT ["spark-submit", "--jars", "/opt/spark/jars/spark-streaming-kafka-0-10-assembly_2.12-3.3.1.jar,/opt/spark/jars/spark-sql-kafka-0-10_2.12-3.3.1.jar", "/opt/spark-apps/spark_kafka_consumer.py"]

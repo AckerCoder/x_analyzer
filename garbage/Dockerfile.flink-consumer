@@ -1,0 +1,29 @@
+# Usar una imagen base que tenga tanto Java como Python preinstalados
+FROM openjdk:8-jdk-slim
+
+# Establecer el directorio de trabajo
+WORKDIR /app
+
+# Copiar los archivos necesarios
+COPY flink_kafka_consumer.py .
+COPY .env .
+
+# Instalar dependencias de Python y sistema
+RUN apt-get update && apt-get install -y python3 python3-pip wget && \
+    apt-get clean
+
+# Instalar PyFlink
+RUN pip3 install kafka-python python-dotenv apache-flink==1.14.4
+
+# Descargar Apache Flink
+RUN wget https://downloads.apache.org/flink/flink-1.14.4/flink-1.14.4-bin-scala_2.11.tgz && \
+    tar -xzf flink-1.14.4-bin-scala_2.11.tgz && \
+    mv flink-1.14.4 /usr/local/flink && \
+    rm flink-1.14.4-bin-scala_2.11.tgz
+
+# Establecer variables de entorno
+ENV FLINK_HOME /usr/local/flink
+ENV PATH $PATH:$FLINK_HOME/bin
+
+# Comando para ejecutar el consumidor de Kafka
+CMD ["python3", "flink_kafka_consumer.py"]
